@@ -1,4 +1,16 @@
-items = {
+from typing import Dict, List, TypedDict
+
+class ItemDetails(TypedDict):
+    cost: int
+    calories: int
+
+class RatioItem(TypedDict):
+    name: str
+    cost: int
+    calories: int
+    ratio: float
+
+items: Dict[str, ItemDetails] = {
     "pizza": {"cost": 50, "calories": 300},
     "hamburger": {"cost": 40, "calories": 250},
     "hot-dog": {"cost": 30, "calories": 200},
@@ -8,7 +20,7 @@ items = {
 }
 
 
-def greedy_algorithm(items: dict, budget: int) -> dict:
+def greedy_algorithm(items: Dict[str, ItemDetails], budget: int) -> Dict[str, ItemDetails]:
     """
     Greedy algorithm to select dishes maximizing calorie-to-cost ratio.
     
@@ -20,9 +32,9 @@ def greedy_algorithm(items: dict, budget: int) -> dict:
         Dictionary with selected dishes and their details
     """
     # Calculate calorie-to-cost ratio for each item
-    items_with_ratio = []
+    items_with_ratio: List[RatioItem] = []
     for name, details in items.items():
-        ratio = details["calories"] / details["cost"]
+        ratio: float = details["calories"] / details["cost"]
         items_with_ratio.append({
             "name": name,
             "cost": details["cost"],
@@ -34,9 +46,9 @@ def greedy_algorithm(items: dict, budget: int) -> dict:
     items_with_ratio.sort(key=lambda x: x["ratio"], reverse=True)
     
     # Select items while budget allows
-    selected_items = {}
-    total_cost = 0
-    total_calories = 0
+    selected_items: Dict[str, ItemDetails] = {}
+    total_cost: int = 0
+    total_calories: int = 0
     
     for item in items_with_ratio:
         if total_cost + item["cost"] <= budget:
@@ -50,7 +62,7 @@ def greedy_algorithm(items: dict, budget: int) -> dict:
     return selected_items
 
 
-def dynamic_programming(items: dict, budget: int) -> dict:
+def dynamic_programming(items: Dict[str, ItemDetails], budget: int) -> Dict[str, ItemDetails]:
     """
     Dynamic programming algorithm to find optimal set of dishes for maximum calories.
     
@@ -62,17 +74,17 @@ def dynamic_programming(items: dict, budget: int) -> dict:
         Dictionary with selected dishes and their details
     """
     # Convert items to lists for easier indexing
-    item_names = list(items.keys())
-    n = len(item_names)
+    item_names: List[str] = list(items.keys())
+    n: int = len(item_names)
     
     # Create DP table
-    dp = [[0 for _ in range(budget + 1)] for _ in range(n + 1)]
+    dp: List[List[int]] = [[0 for _ in range(budget + 1)] for _ in range(n + 1)]
     
     # Fill DP table
     for i in range(1, n + 1):
-        item_name = item_names[i - 1]
-        cost = items[item_name]["cost"]
-        calories = items[item_name]["calories"]
+        item_name: str = item_names[i - 1]
+        cost: int = items[item_name]["cost"]
+        calories: int = items[item_name]["calories"]
         
         for w in range(budget + 1):
             if cost <= w:
@@ -81,8 +93,8 @@ def dynamic_programming(items: dict, budget: int) -> dict:
                 dp[i][w] = dp[i - 1][w]
     
     # Backtrack to find selected items
-    selected_items = {}
-    w = budget
+    selected_items: Dict[str, ItemDetails] = {}
+    w: int = budget
     
     for i in range(n, 0, -1):
         if dp[i][w] != dp[i - 1][w]:
@@ -92,6 +104,8 @@ def dynamic_programming(items: dict, budget: int) -> dict:
                 "calories": items[item_name]["calories"]
             }
             w -= items[item_name]["cost"]
+            if w < 0:
+                break
     
     return selected_items
 
